@@ -5,7 +5,8 @@ import {
   getTruckById,
   updateTruck,
   deleteTruck,
-  toggleTruckPrototypes 
+  turnOnPrototypes,
+  turnOffPrototypes, 
 
 } from "../controlers/truckController.js";
 
@@ -26,8 +27,10 @@ router.put("/:id", updateTruck);
 // DELETE /api/trucks/:id -> Eliminar camión
 router.delete("/:id", deleteTruck);
 
-//ruta para encender/apagar prototipos
-router.put("/:id/toggle-prototypes", toggleTruckPrototypes);
+// Activar prototipos de un camión
+router.put("/:id/on", turnOnPrototypes);
 
+// Desactivar prototipos de un camión
+router.put("/:id/off", turnOffPrototypes);
 
 export default router;

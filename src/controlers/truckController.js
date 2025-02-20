@@ -1,4 +1,5 @@
 import Truck from "../models/truck.js";
+import Prot from "../models/prot.js";
 
 // Crear un camión
 export const createTruck = async (req, res) => {
@@ -82,29 +83,73 @@ export const deleteTruck = async (req, res) => {
   }
 };
 
-// Encender o apagar todos los prototipos de un camión
-export const toggleTruckPrototypes = async (req, res) => {
-    try {
-      const { id } = req.params;  // ID del camión
-      const { activo } = req.body; // Valor booleano (true o false)
-  
-      // 1. Verificar si el camión existe
-      const truck = await Truck.findById(id);
-      if (!truck) {
-        return res.status(404).json({ message: "Camión no encontrado" });
-      }
-  
-      // 2. Actualizar todos los prototipos asociados a este camión
-      await Prot.updateMany(
-        { truckId: truck._id },
-        { activo }
-      );
-  
-      return res.status(200).json({
-        message: `Se han ${activo ? "encendido" : "apagado"} todos los prototipos del camión`
-      });
-    } catch (error) {
-      return res.status(500).json({ message: "Error al actualizar prototipos", error });
+// (1) Encender prototipos de un camión
+export const turnOnPrototypes = async (req, res) => {
+  console.log("=== turnOnPrototypes called ===");
+  try {
+    // 1. Obtenemos el ID del camión desde req.params
+    const { id } = req.params;
+    console.log("Param ID =>", id);
+
+    // 2. Buscamos el camión en la base de datos
+    const truck = await Truck.findById(id);
+    console.log("Truck encontrado =>", truck);
+
+    // 3. Si no existe, respondemos con 404
+    if (!truck) {
+      console.log("Camión no encontrado con ID =>", id);
+      return res.status(404).json({ message: "Camión no encontrado" });
     }
-  };
-  
+
+    // 4. Encendemos (activo = true) todos los prototipos con truckId = truck._id
+    console.log("Encendiendo prototipos con truckId =>", truck._id);
+    const result = await Prot.updateMany({ truckId: truck._id }, { activo: true });
+    
+    console.log("Resultado updateMany =>", result);
+
+    // 5. Respondemos éxito
+    return res.status(200).json({
+      message: "Se han encendido todos los prototipos del camión",
+      updateInfo: result
+    });
+  } catch (error) {
+    // En caso de error, mostramos en consola y mandamos en la respuesta
+    console.log("Error en turnOnPrototypes =>", error);
+    return res.status(500).json({ message: "Error al encender prototipos", error });
+  }
+};
+
+// (2) Apagar prototipos de un camión
+export const turnOffPrototypes = async (req, res) => {
+  console.log("=== turnOffPrototypes called ===");
+  try {
+    // 1. Obtenemos el ID del camión
+    const { id } = req.params;
+    console.log("Param ID =>", id);
+
+    // 2. Buscamos el camión
+    const truck = await Truck.findById(id);
+    console.log("Truck encontrado =>", truck);
+
+    // 3. Si no existe, respondemos con 404
+    if (!truck) {
+      console.log("Camión no encontrado con ID =>", id);
+      return res.status(404).json({ message: "Camión no encontrado" });
+    }
+
+    // 4. Apagamos (activo = false) todos los prototipos con truckId = truck._id
+    console.log("Apagando prototipos con truckId =>", truck._id);
+    const result = await Prot.updateMany({ truckId: truck._id }, { activo: false });
+    
+    console.log("Resultado updateMany =>", result);
+
+    // 5. Respondemos éxito
+    return res.status(200).json({
+      message: "Se han apagado todos los prototipos del camión",
+      updateInfo: result
+    });
+  } catch (error) {
+    console.log("Error en turnOffPrototypes =>", error);
+    return res.status(500).json({ message: "Error al apagar prototipos", error });
+  }
+};
