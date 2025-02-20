@@ -1,35 +1,39 @@
 import mongoose from "mongoose";
 
-// Definir el esquema del prototipo
 const protSchema = new mongoose.Schema({
   temperatura: {
     type: Number,
-    required: true,
+    default: 0, // o  null
   },
   humedad: {
     type: Number,
-    required: true,
+    default: 0, // o  null
   },
   hora: {
     type: Date,
-    default: Date.now, // Guarda la fecha y hora automáticamente
+    default: Date.now,
   },
   dispositivoId: {
     type: String,
     required: true,
+    unique: true,
   },
-//   ubicacion: {
-//     type: String,
-//     default: "Desconocida",
-//   },
   estado: {
     type: String,
-    enum: ["OK", "Advertencia", "Crítico"], // Estado del sensor
+    enum: ["OK", "Advertencia", "Crítico"],
     default: "OK",
+  },
+  truckId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Truck",
+    required: true,
+  },
+  activo: {
+    type: Boolean,
+    default: true,
   },
 });
 
-// Crear el modelo en MongoDB
 const Prot = mongoose.model("Prot", protSchema);
 
 export default Prot;
