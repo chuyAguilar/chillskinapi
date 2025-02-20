@@ -5,7 +5,8 @@ import {
   getAllProtData,       // Obtener todos los prototipos
   getProtById,          // Obtener un prototipo por ID
   updateProtData,       // Actualizar un prototipo
-  deleteProtData        // Eliminar un prototipo
+  deleteProtData, // Eliminar un prototipo
+  getProtReadings       
 } from "../controlers/protController.js";
 
 const router = express.Router();
@@ -27,5 +28,8 @@ router.put("/:id", updateProtData);
 
 // 6) Eliminar un prototipo
 router.delete("/:id", deleteProtData);
+
+router.get("/:id/readings", getProtReadings);
+
 
 export default router;

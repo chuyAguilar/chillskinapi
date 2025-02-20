@@ -1,5 +1,7 @@
 import Prot from "../models/prot.js";
 import Truck from "../models/truck.js";
+import Reading from "../models/reading.js";
+
 
 /**
  * 1) Registrar un Prototipo
@@ -53,38 +55,42 @@ export const registerProt = async (req, res) => {
   }
 };
 
-/**
- * 2) Recibir Lecturas (cada 10 minutos)
- *    - El ESP32 manda { dispositivoId, temperatura, humedad }.
- *    - NO envía truckId (el backend lo deduce).
- *    - Se actualizan los campos en el doc Prot, guardando la última lectura.
- */
+
 export const saveProtReading = async (req, res) => {
   try {
-    const { dispositivoId, temperatura, humedad } = req.body;
+    const { dispositivoId, temperatura, humedad, latitud, longitud } = req.body;
 
-    // Buscar el prototipo por su dispositivoId
+    // 1. Buscar el prototipo por dispositivoId
     const prot = await Prot.findOne({ dispositivoId });
     if (!prot) {
       return res.status(404).json({ message: "Prototipo no registrado" });
     }
 
-    // Verificar si está activo
+    // 2. Verificar si está activo
     if (!prot.activo) {
-      return res.status(200).json({ 
-        message: "Prototipo inactivo, no se guardó la lectura" 
-      });
+      return res.status(200).json({ message: "Prototipo inactivo, no se guardó la lectura" });
     }
 
-    // Actualizar la lectura en el prototipo
-    prot.temperatura = temperatura;
-    prot.humedad = humedad;
-    prot.hora = Date.now(); // Actualiza la hora a la lectura actual
-    await prot.save();
+    // 3. Obtener la fecha y la hora separadas
+    const now = new Date();
+    const fecha = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const hora = now.toTimeString().split(" ")[0]; // "HH:MM:SS"
 
-    return res.status(200).json({
+    // 4. Crear un nuevo documento en Reading (histórico) incluyendo las coordenadas GPS
+    const newReading = new Reading({
+      protId: prot._id,
+      temperatura,
+      humedad,
+      fecha,
+      hora,
+      latitud,
+      longitud,
+    });
+    await newReading.save();
+
+    return res.status(201).json({
       message: "Lectura guardada correctamente",
-      data: prot, // Retorna el prototipo actualizado
+      data: newReading,
     });
   } catch (error) {
     return res.status(500).json({
@@ -93,6 +99,20 @@ export const saveProtReading = async (req, res) => {
     });
   }
 };
+
+
+// GET /api/prots/:id/readings
+export const getProtReadings = async (req, res) => {
+  try {
+    const { id } = req.params; // id del prototipo
+    // Buscar todas las lecturas que tengan protId = id
+    const readings = await Reading.find({ protId: id }).sort({ fecha: -1 }); // orden descendente
+    res.status(200).json(readings);
+  } catch (error) {
+    res.status(500).json({ message: "Error al obtener lecturas", error });
+  }
+};
+
 
 /**
  * 3) Obtener todos los prototipos
