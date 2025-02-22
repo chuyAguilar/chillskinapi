@@ -2,6 +2,7 @@ import Prot from "../models/prot.js";
 import Truck from "../models/truck.js";
 import Reading from "../models/reading.js";
 
+
 /**
  * 1) Registrar un Prototipo
  *    - Se usa para asignar un nuevo dispositivoId a un truckId.
@@ -54,6 +55,7 @@ export const registerProt = async (req, res) => {
   }
 };
 
+
 export const saveProtReading = async (req, res) => {
   try {
     const { dispositivoId, temperatura, humedad, latitud, longitud } = req.body;
@@ -66,27 +68,14 @@ export const saveProtReading = async (req, res) => {
 
     // 2. Verificar si está activo
     if (!prot.activo) {
-      return res
-        .status(200)
-        .json({ message: "Prototipo inactivo, no se guardó la lectura" });
+      return res.status(200).json({ message: "Prototipo inactivo, no se guardó la lectura" });
     }
 
-    // 3. Obtener la fecha y la hora separadas (hora local)
-    const now = new Date();
+    // 3. Obtener la fecha y la hora separadas
+const now = new Date();
+const fecha = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+const hora = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
 
-    // Convertir a la zona horaria local deseada, en este ejemplo "America/Mexico_City"
-    const fechaLocal = now.toLocaleDateString("es-MX", {
-      timeZone: "America/Mexico_City",
-    });
-
-    const horaLocal = now.toLocaleTimeString("es-MX", {
-      timeZone: "America/Mexico_City",
-      hour12: false, // Para usar formato 24 horas
-    });
-
-    // Si quieres mantener la misma lógica de 'fecha' y 'hora' como antes:
-    const fecha = fechaLocal; // p. ej. "22/02/2025"
-    const hora = horaLocal; // p. ej. "17:05:12"
 
     // 4. Crear un nuevo documento en Reading (histórico) incluyendo las coordenadas GPS
     const newReading = new Reading({
@@ -112,6 +101,7 @@ export const saveProtReading = async (req, res) => {
   }
 };
 
+
 // GET /api/prots/:id/readings
 export const getProtReadings = async (req, res) => {
   try {
@@ -123,6 +113,7 @@ export const getProtReadings = async (req, res) => {
     res.status(500).json({ message: "Error al obtener lecturas", error });
   }
 };
+
 
 /**
  * 3) Obtener todos los prototipos
@@ -149,10 +140,7 @@ export const getAllProtData = async (req, res) => {
 export const getProtById = async (req, res) => {
   try {
     const { id } = req.params;
-    const prot = await Prot.findById(id).populate(
-      "truckId",
-      "nombre descripcion"
-    );
+    const prot = await Prot.findById(id).populate("truckId", "nombre descripcion");
     if (!prot) {
       return res.status(404).json({ message: "Prototipo no encontrado" });
     }
