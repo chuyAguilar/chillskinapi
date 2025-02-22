@@ -1,18 +1,7 @@
 import mongoose from "mongoose";
 
 const protSchema = new mongoose.Schema({
-  temperatura: {
-    type: Number,
-    default: 0, // o  null
-  },
-  humedad: {
-    type: Number,
-    default: 0, // o  null
-  },
-  hora: {
-    type: Date,
-    default: Date.now,
-  },
+
   dispositivoId: {
     type: String,
     required: true,

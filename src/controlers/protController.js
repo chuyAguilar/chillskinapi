@@ -68,14 +68,22 @@ export const saveProtReading = async (req, res) => {
 
     // 2. Verificar si está activo
     if (!prot.activo) {
-      return res.status(200).json({ message: "Prototipo inactivo, no se guardó la lectura" });
+      return res
+        .status(200)
+        .json({ message: "Prototipo inactivo, no se guardó la lectura" });
     }
 
-    // 3. Obtener la fecha y la hora separadas
-const now = new Date();
-const fecha = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-const hora = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-
+    // 3. Obtener la fecha y la hora separadas en la zona horaria deseada (ej: America/Mexico_City)
+    const now = new Date();
+    const localNow = new Date(
+      now.toLocaleString("en-US", { timeZone: "America/Mexico_City" })
+    );
+    const fecha = new Date(
+      localNow.getFullYear(),
+      localNow.getMonth(),
+      localNow.getDate()
+    );
+    const hora = localNow.toLocaleTimeString("es-MX", { hour12: false });
 
     // 4. Crear un nuevo documento en Reading (histórico) incluyendo las coordenadas GPS
     const newReading = new Reading({
