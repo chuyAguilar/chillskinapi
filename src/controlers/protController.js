@@ -72,9 +72,10 @@ export const saveProtReading = async (req, res) => {
     }
 
     // 3. Obtener la fecha y la hora separadas
-    const now = new Date();
-    const fecha = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const hora = now.toTimeString().split(" ")[0]; // "HH:MM:SS"
+const now = new Date();
+const fecha = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+const hora = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+
 
     // 4. Crear un nuevo documento en Reading (histórico) incluyendo las coordenadas GPS
     const newReading = new Reading({
